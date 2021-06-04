@@ -1,0 +1,45 @@
+diff --git a/models/common.py b/models/common.py
+index a11240b..94cb912 100644
+--- a/models/common.py
++++ b/models/common.py
+@@ -4,7 +4,7 @@ import math
+ import torch
+ import torch.nn as nn
+ 
+-from mish_cuda import MishCuda as Mish
++#from mish_cuda import MishCuda as Mish
+ 
+ 
+ def autopad(k, p=None):  # kernel, padding
+@@ -185,4 +185,4 @@ class Classify(nn.Module):
+ 
+     def forward(self, x):
+         z = torch.cat([self.aap(y) for y in (x if isinstance(x, list) else [x])], 1)  # cat if list
+-        return self.flat(self.conv(z))  # flatten to x(b,c2)
+\ No newline at end of file
++        return self.flat(self.conv(z))  # flatten to x(b,c2)
+diff --git a/models/models.py b/models/models.py
+index 5dcb248..b7d4304 100644
+--- a/models/models.py
++++ b/models/models.py
+@@ -2,6 +2,7 @@ from utils.google_utils import *
+ from utils.layers import *
+ from utils.parse_config import *
+ from utils import torch_utils
++from utils.activations import *
+ 
+ ONNX_EXPORT = False
+ 
+diff --git a/utils/layers.py b/utils/layers.py
+index 7b85183..c4cce5d 100644
+--- a/utils/layers.py
++++ b/utils/layers.py
+@@ -5,7 +5,7 @@ from utils.general import *
+ import torch
+ from torch import nn
+ 
+-from mish_cuda import MishCuda as Mish
++#from mish_cuda import MishCuda as Mish
+ 
+ 
+ def make_divisible(v, divisor):
