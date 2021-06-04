@@ -1,6 +1,12 @@
-## ML@Edge with SageMaker - Getting Started Kit
+## ML@Edge with SageMaker - Getting Started Examples
 
-This repository contains examples of different models, showing they can be built on [Amazon Sagemaker](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html) and deployed using [Sagemaker Edge Manager](https://docs.aws.amazon.com/sagemaker/latest/dg/edge.html).
+
+This repository contains examples of different models, showing how they can be built using SageMaker and prepared for deployment at the edge.      
+
+
+
+In this repository, we will use [Amazon Sagemaker](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html) to train the models, [Sagemker-Neo](https://docs.aws.amazon.com/sagemaker/latest/dg/neo.html) to compile them [Sagemaker Edge Manager](https://docs.aws.amazon.com/sagemaker/latest/dg/edge.html) to packaged them. Once the package is created, it can be deployed at the edge devices(for example: Jetson Xavier Jetpack 4.4.1)
+
 
 Let us understand the structure of the repository:    
 - [models](models) folder contains one sub-folder per model/framework type. These subfolders contain a jupyter notebook which does the following:
