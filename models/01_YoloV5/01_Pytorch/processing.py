@@ -43,14 +43,7 @@ class Processor():
         yv, xv = np.meshgrid(np.arange(ny), np.arange(nx), indexing='ij')
         return np.stack((xv, yv), 2).reshape((1, 1, ny, nx, 2)).astype(np.float32)
     
-    def post_process(self, preds, source_image_shape, image=None):
-        z = []        
-        for i,tensor in enumerate(preds):            
-            tensor = 1/(1 + np.exp(-tensor)) # sigmoid
-            tensor[..., 0:2] = (tensor[..., 0:2] * 2. - 0.5 + self.grids[i]) * self.strides[i]  # xy
-            tensor[..., 2:4] = (tensor[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
-            z.append(tensor.reshape(tensor.shape[0], -1, self.feature_count))
-        predictions = np.concatenate(z, axis=1)
+    def post_process(self, predictions, source_image_shape, image=None):
         xc = predictions[..., 4] > self.threshold
         predictions = predictions[xc]
         bboxes, scores, cids = self.get_detections(predictions)
