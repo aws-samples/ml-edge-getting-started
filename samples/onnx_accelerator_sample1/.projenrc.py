@@ -18,12 +18,14 @@
 from projen.awscdk import AwsCdkPythonApp
 
 project = AwsCdkPythonApp(
+    author_email="Amazon Web Services",
     author_name="Amazon Web Services",
-    cdk_version="2.1.0",
+    cdk_version="2.68.0",
     module_name="onnxacceleratorsampleone",
     name="onnxacceleratorsampleone",
     version="0.1.0",
-    context={"thing_name":"WindTurbine", "thing_group_name":"WindTurbines", "devices_logs_topic":"device/+/logs"}
+    context={"thing_name":"WindTurbine", "thing_group_name":"WindTurbines", "devices_logs_topic":"device/+/logs"},
+    pytest=False
 )
 
 project.add_dependency('boto3@1.26.72')

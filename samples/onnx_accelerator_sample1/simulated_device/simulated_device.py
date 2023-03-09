@@ -61,14 +61,8 @@ def on_connect(client, userdata, flags, rc):
         print("Connection failed")
 
 if __name__ == '__main__':
-    # parse the input parameters    
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--debug", action="store_true", help='Enable debugging messages')    
-
-    args = parser.parse_args()
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO )
-    logging.debug("Parsing parameters")
+    
+    logging.basicConfig(level=logging.INFO )
 
     if not os.path.exists(FILENAME):
         logging.info("Input dataset not found, downloading it...")

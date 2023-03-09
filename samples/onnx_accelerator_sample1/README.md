@@ -89,6 +89,8 @@ The following outputs will be available to you:
 - DeploymentPackageS3BucketName : The S3 bucket containing the deployment artifacts for edge devices (onnx exported model + job json file)
 - DomainIdSagemaker : The sagemaker domain ID
 
+Note: Sagemaker Studio will be provisioned using the default VPC, thus it needs to exist. If you want to use a different VPC, udpate ```default_vpc_id = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)``` in [main_stack.py](./onnxacceleratorsampleone/main_stack.py)
+
 ## Notebooks
 
 Clone this repo in Sagemaker Studio. You will run two notebooks there:
@@ -111,11 +113,13 @@ In [this directory](./edge_application/) you'll find the Python application that
 
 Do not forget to delete the stacks to avoid unexpected charges
 
+First make sure to remove all data from the model registry
+
 ```shell
     $ cdk destroy onnxacceleratorsampleone-dev
 ```
 
-Then in the AWS console, delete the iot thing, thing group, thing type, and device certificates.
+Then in the AWS console, delete the iot thing, thing group, thing type, and device certificates and S3 buckets.
 
 ## Content Security Legal Disclaimer
 The sample code; software libraries; command line tools; proofs of concept; templates; or other related technology (including any of the foregoing that are provided by our personnel) is provided to you as AWS Content under the AWS Customer Agreement, or the relevant written agreement between you and AWS (whichever applies). You should not use this AWS Content in your production accounts, or on production or other critical data. You are responsible for testing, securing, and optimizing the AWS Content, such as sample code, as appropriate for production grade use based on your specific quality control practices and standards. Deploying AWS Content may incur AWS charges for creating or using AWS chargeable resources, such as running Amazon EC2 instances or using Amazon S3 storage.
