@@ -108,6 +108,10 @@ edge_application
     | private.pem
     | certificate.pem
     | amznrootca.pem
+  | config.json
+  | edge_application.py
+  | requirements.txt
+  | README.md
 ```
 
 - Replace the value of ```target_endpoint``` in config.json by the value of the iot endpoint you pulled earlier (```Device data endpoint```)
