@@ -66,17 +66,19 @@ This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com
     $ cd samples/onnx_accelerator_sample1
     ```
 
-3. Boostrap AWS CDK resources on the AWS account.
-    ```shell
-    $ cdk bootstrap
-    ```
-4. Build the project locally.
+3. Activate virtualenv, install dependencies and synthesize.
     ```shell
     $ npx projen build
     ```
+
+4. Boostrap AWS CDK resources on the AWS account.
+    ```shell
+    $ npx cdk bootstrap
+    ```
+
 5. Deploy the sample in your account
     ```shell
-    $ cdk deploy
+    $ npx cdk deploy
     ```
 
 Once the stack is deployed, in the console go to Cloudformation -> Stacks -> onnxacceleratorsampleone-dev -> Outputs
