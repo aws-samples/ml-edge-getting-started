@@ -101,6 +101,8 @@ Clone this repo in Sagemaker Studio. You will run two notebooks there:
 
 Once the model is registered, changing its status from "pending manual approval" to "approved" will trigger a model deployment at the edge. 
 
+![approved_model.png](./doc/images/approved_model.png)
+
 ## Simulated device
 
 In [this directory](./simulated_device/) you'll find the Python application that runs on each Edge Device and streams synthetic raw turbine data. The README in that folder provides instructions on how to configure and run that application. 
@@ -109,17 +111,23 @@ In [this directory](./simulated_device/) you'll find the Python application that
 
 In [this directory](./edge_application/) you'll find the Python application that runs on each Edge Device and performs predictions as well as communication with the cloud. The README in that folder provides instructions on how to configure and run that application. 
 
+## Visualization
+
+Access the Amazon Cloudwatch dashboard using the URL output provided by your cloudformation stack. Four widgets are available with sample queries to visualize useful information (input data, anomalies). You can modify those queries in [main_stack.py](./onnxacceleratorsampleone/main_stack.py) if you want to display different data.
+
+![dashboard.png](./doc/images/cloudwatch_dashboard.png)
+
 ## Delete stack
 
-Do not forget to delete the stacks to avoid unexpected charges
+Do not forget to delete the stack to avoid unexpected charges
 
-First make sure to remove all data from the model registry
+First make sure to remove all data (model versions) from the model registry. Then:
 
 ```shell
     $ cdk destroy onnxacceleratorsampleone-dev
 ```
 
-Then in the AWS console, delete the iot thing, thing group, thing type, and device certificates and S3 buckets.
+Then in the AWS console, delete the iot thing, thing group, thing type, device certificates and S3 buckets.
 
 ## Content Security Legal Disclaimer
 The sample code; software libraries; command line tools; proofs of concept; templates; or other related technology (including any of the foregoing that are provided by our personnel) is provided to you as AWS Content under the AWS Customer Agreement, or the relevant written agreement between you and AWS (whichever applies). You should not use this AWS Content in your production accounts, or on production or other critical data. You are responsible for testing, securing, and optimizing the AWS Content, such as sample code, as appropriate for production grade use based on your specific quality control practices and standards. Deploying AWS Content may incur AWS charges for creating or using AWS chargeable resources, such as running Amazon EC2 instances or using Amazon S3 storage.
