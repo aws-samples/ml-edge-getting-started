@@ -1,0 +1,10 @@
+{
+    "broker": "localhost",
+    "port": 1883,
+    "client_id": "edge_application",
+    "target_endpoint": "MY_TARGET_ENDPOINT",
+    "thing_name": "WindTurbineOne",
+    "cert_filepath": "./certs/certificate.pem",
+    "private_key_filepath": "./certs/private.pem",
+    "ca_filepath": "./certs/amznrootca.pem"
+}
