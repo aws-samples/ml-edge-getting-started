@@ -42,6 +42,8 @@ class MainStack(Stack):
   def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
+    use_greengrass = self.node.try_get_context('use_greengrass')
+
     ####################################
     #### Sagemaker Studio and users  ###
     ####################################
@@ -129,18 +131,85 @@ class MainStack(Stack):
 
     iot_thing_group_name = self.node.try_get_context('thing_group_name')
 
-    # attach the lambda which will be triggered everytime there is a new object created
-    function_iot_deployment = _lambda.Function(self, "lambda_function",
-                                                runtime=_lambda.Runtime.PYTHON_3_9,
-                                                handler="lambda.handler",
-                                                code=_lambda.Code.from_asset("functions/iotjobcreator/src"),
-                                                function_name="iot_job_deployment",
-                                                environment={
-                                                    'THING_GROUP_NAME': iot_thing_group_name,
-                                                    'ARN_IOT_PROVISIONING_ROLE': iot_job_s3_role.role_arn
-                                                }
-                                                )
-    
+    if use_greengrass is True:
+      # attach the lambda which will be triggered everytime there is a new object created
+      function_iot_deployment = _lambda.Function(self, "lambda_function",
+                                                  runtime=_lambda.Runtime.PYTHON_3_9,
+                                                  handler="lambda.handler",
+                                                  code=_lambda.Code.from_asset("functions/greengrassdeploymentcreator/src"),
+                                                  function_name="greengrass_deployment",
+                                                  environment={
+                                                      'THING_GROUP_NAME': iot_thing_group_name
+                                                  }
+                                                  )
+      
+      function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          'greengrass:ListComponents',
+          'greengrass:GetDeployment',
+          'greengrass:CreateDeployment',
+          'greengrass:ListDeployments',
+          'greengrass:ListComponentVersions'
+
+        ],
+        resources=[
+          'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':components:*',
+          'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':/greengrass/groups/*',
+          'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':deployments',
+          'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':deployments:*'
+        ]
+      ))
+
+      function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          'iot:DescribeJob',
+          'iot:CancelJob',
+          'iot:CreateJob'
+
+        ],
+        resources=[
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':job/*',
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thinggroup/*'
+        ]
+      ))
+    else:
+      # attach the lambda which will be triggered everytime there is a new object created
+      function_iot_deployment = _lambda.Function(self, "lambda_function",
+                                                  runtime=_lambda.Runtime.PYTHON_3_9,
+                                                  handler="lambda.handler",
+                                                  code=_lambda.Code.from_asset("functions/iotjobcreator/src"),
+                                                  function_name="iot_job_deployment",
+                                                  environment={
+                                                      'THING_GROUP_NAME': iot_thing_group_name,
+                                                      'ARN_IOT_PROVISIONING_ROLE': iot_job_s3_role.role_arn
+                                                  }
+                                                  )
+
+      function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          'iam:PassRole'
+        ],
+        resources=[
+          'arn:aws:iam::'+ Aws.ACCOUNT_ID+':role/'+iot_job_s3_role.role_name
+        ]
+      ))
+
+      function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          'iot:CreateJob'
+        ],
+        resources=[
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':job/*',
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thing/*',
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thinggroup/*',
+          'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':jobtemplate/*'
+        ]
+      ))
+
     function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
       effect=iam.Effect.ALLOW,
       actions=[
@@ -148,29 +217,6 @@ class MainStack(Stack):
       ],
       resources=[
         'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thinggroup/'+iot_thing_group_name
-      ]
-    ))
-
-    function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
-      effect=iam.Effect.ALLOW,
-      actions=[
-        'iam:PassRole'
-      ],
-      resources=[
-        'arn:aws:iam::'+ Aws.ACCOUNT_ID+':role/'+iot_job_s3_role.role_name
-      ]
-    ))
-
-    function_iot_deployment.add_to_role_policy(iam.PolicyStatement(
-      effect=iam.Effect.ALLOW,
-      actions=[
-        'iot:CreateJob'
-      ],
-      resources=[
-        'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':job/*',
-        'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thing/*',
-        'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':thinggroup/*',
-        'arn:aws:iot:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':jobtemplate/*'
       ]
     ))
     
@@ -184,10 +230,17 @@ class MainStack(Stack):
     
     new_deployment_package_notification = aws_s3_notifications.LambdaDestination(function_iot_deployment)
 
-    deployment_bucket.add_event_notification(
-      s3.EventType.OBJECT_CREATED, 
-      new_deployment_package_notification,
-      s3.NotificationKeyFilter(suffix="json"))
+    if use_greengrass is True:
+      deployment_bucket.add_event_notification(
+        s3.EventType.OBJECT_CREATED, 
+        new_deployment_package_notification,
+        s3.NotificationKeyFilter(suffix="zip"))
+    else:
+      deployment_bucket.add_event_notification(
+        s3.EventType.OBJECT_CREATED, 
+        new_deployment_package_notification,
+        s3.NotificationKeyFilter(suffix="json"))
+  
     deployment_bucket.grant_read(function_iot_deployment)
     
     # create s3 bucket for codebuild input artifacts: codebuild needs to run some scripts
@@ -202,19 +255,19 @@ class MainStack(Stack):
                   export_name="CodeBuildInputArtifactsS3BucketName"
                   )
     
-    #upload the script which will be used by codebuild to create the deployment package
-    aws_s3_deployment.BucketDeployment(self, "DeployCodeBuildInputArtifacts",
-        sources=[aws_s3_deployment.Source.asset("./onnxacceleratorsampleone/without_ggv2")],
-        destination_bucket=artifacts_bucket
-    )
-    
-    # Create the codebuild project
-    build_project = cbuild.Project(self, "packageonnxmodel",
+    #upload the assets which will be used by codebuild to create the deployment package
+    if use_greengrass is True:
+      aws_s3_deployment.BucketDeployment(self, "DeployCodeBuildInputArtifacts",
+          sources=[aws_s3_deployment.Source.asset("./onnxacceleratorsampleone/with_ggv2")],
+          destination_bucket=artifacts_bucket
+      )
+
+      build_project = cbuild.Project(self, "packageonnxmodel",
         environment=cbuild.BuildEnvironment(
             build_image=cbuild.LinuxBuildImage.STANDARD_3_0,
         ),
         project_name="onnxmodelpackagebuilder",
-        timeout=Duration.hours(1),
+        timeout=Duration.hours(1),  
         build_spec=cbuild.BuildSpec.from_object({
             "version": "0.2",
             "phases": {    
@@ -227,21 +280,13 @@ class MainStack(Stack):
                     "commands": [
                         "pip3 install torch==1.13.1",
                         "pip3 install numpy==1.24.2",
-                        "echo $CODEBUILD_BUILD_ID",
-                        "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/$S3_ARTIFACTS_OBJECT $S3_ARTIFACTS_OBJECT", # we pull the script which will be used to build our deployment package,
+                        "echo $PWD",
+                        "ls",
+                        "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/$S3_ARTIFACTS_OBJECT $S3_ARTIFACTS_OBJECT",
+                        "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/components ./ --recursive", # we pull all the artifacts used to build our deployment package,
                         "python $S3_ARTIFACTS_OBJECT", # run the script to build the deployment package
-                        "cp *.onnx /tmp", # the generated onnx file is copied to the folder used to copy artifacts
-                        "cp job.json /tmp",
                     ]
                 }
-            },
-            "artifacts": {
-                "files": [
-                    "*.onnx",
-                    "job.json"
-                ],
-                "base-directory": "/tmp",
-                "discard-paths": "yes",
             }
         }),
         artifacts=cbuild.Artifacts.s3(
@@ -250,7 +295,67 @@ class MainStack(Stack):
             package_zip=False, # we don't want to zip everything as we create a job file
             identifier="AddArtifact1"
         )
-    )
+      )
+
+      build_project.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          'greengrass:CreateComponentVersion'
+        ],
+        resources=[
+          'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':components:*'
+        ]
+      ))
+
+    else:
+      aws_s3_deployment.BucketDeployment(self, "DeployCodeBuildInputArtifacts",
+          sources=[aws_s3_deployment.Source.asset("./onnxacceleratorsampleone/without_ggv2")],
+          destination_bucket=artifacts_bucket
+      )
+    
+      # Create the codebuild project
+      build_project = cbuild.Project(self, "packageonnxmodel",
+          environment=cbuild.BuildEnvironment(
+              build_image=cbuild.LinuxBuildImage.STANDARD_3_0,
+          ),
+          project_name="onnxmodelpackagebuilder",
+          timeout=Duration.hours(1),  
+          build_spec=cbuild.BuildSpec.from_object({
+              "version": "0.2",
+              "phases": {    
+                  "install": {
+                      "runtime-versions":{
+                          "python": 3.9
+                      },
+                  },
+                  "build": { 
+                      "commands": [
+                          "pip3 install torch==1.13.1",
+                          "pip3 install numpy==1.24.2",
+                          "echo $CODEBUILD_BUILD_ID",
+                          "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/$S3_ARTIFACTS_OBJECT $S3_ARTIFACTS_OBJECT", # we pull the script which will be used to build our deployment package,
+                          "python $S3_ARTIFACTS_OBJECT", # run the script to build the deployment package
+                          "cp *.onnx /tmp", # the generated onnx file is copied to the folder used to copy artifacts
+                          "cp job.json /tmp",
+                      ]
+                  }
+              },
+              "artifacts": {
+                  "files": [
+                      "*.onnx",
+                      "job.json"
+                  ],
+                  "base-directory": "/tmp",
+                  "discard-paths": "yes",
+              }
+          }),
+          artifacts=cbuild.Artifacts.s3(
+              bucket=deployment_bucket,
+              include_build_id=True,
+              package_zip=False, # we don't want to zip everything as we create a job file
+              identifier="AddArtifact1"
+          )
+      )
 
     # codebuild will get data from the model registry, thus it needs permission for that
     build_project.add_to_role_policy(iam.PolicyStatement(
