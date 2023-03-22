@@ -1,6 +1,5 @@
 import json
 import boto3
-import uuid
 import os
 import urllib.parse
 import time
@@ -9,7 +8,9 @@ iot_job_client = boto3.client('iot')
 greengrass_client = boto3.client('greengrassv2')
 thing_group_name = os.environ['THING_GROUP_NAME']
 region = os.environ['AWS_REGION']
-onnxcomponentname = 'com.aws.onnxedgeapp'
+detector_component_name = 'aws.samples.windturbine.detector'
+model_component_name = 'aws.samples.windturbine.model'
+detector_venv_component_name = 'aws.samples.windturbine.detector.venv'
 
 def get_newest_component_version(component_name):
     """ Gets the newest version of a component """
@@ -68,13 +69,27 @@ def update_deployment(deployment):
     if deployment == '':
         return
 
-    # Add or update our component to the specified version
-    version = get_newest_component_version(onnxcomponentname)
-    if onnxcomponentname not in deployment['components']:
-        print('Adding {} {} to the deployment'.format(onnxcomponentname, version))
+    # Add or update our components to the specified version
+    version = get_newest_component_version(detector_venv_component_name)
+    if detector_venv_component_name not in deployment['components']:
+        print('Adding {} {} to the deployment'.format(detector_venv_component_name, version))
     else:
-        print('Updating deployment with {} {}'.format(onnxcomponentname, version))
-    deployment['components'].update({onnxcomponentname: {'componentVersion': version}})
+        print('Updating deployment with {} {}'.format(detector_venv_component_name, version))
+    deployment['components'].update({detector_venv_component_name: {'componentVersion': version}})
+
+    version = get_newest_component_version(model_component_name)
+    if model_component_name not in deployment['components']:
+        print('Adding {} {} to the deployment'.format(model_component_name, version))
+    else:
+        print('Updating deployment with {} {}'.format(model_component_name, version))
+    deployment['components'].update({model_component_name: {'componentVersion': version}})
+
+    version = get_newest_component_version(detector_component_name)
+    if detector_component_name not in deployment['components']:
+        print('Adding {} {} to the deployment'.format(detector_component_name, version))
+    else:
+        print('Updating deployment with {} {}'.format(detector_component_name, version))
+    deployment['components'].update({detector_component_name: {'componentVersion': version}})
 
 def create_deployment(deployment):
     """ Creates a deployment of the component to the given thing group """

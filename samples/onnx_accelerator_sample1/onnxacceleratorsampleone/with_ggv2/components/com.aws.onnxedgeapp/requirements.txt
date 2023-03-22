@@ -1,8 +1,0 @@
-paho-mqtt==1.6.1
-numpy==1.24.2
-boto3==1.26.72
-pywt==1.0.6
-Pywavelets==1.4.1
-awsiotsdk===1.12.5
-cmd-utils===1.0.0
-onnxruntime===1.13.1

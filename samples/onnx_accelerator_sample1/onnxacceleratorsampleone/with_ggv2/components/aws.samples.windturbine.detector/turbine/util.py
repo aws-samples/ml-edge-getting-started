@@ -14,7 +14,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import math
 import numpy as np
-import boto3
 import pywt
 import socket
 import requests

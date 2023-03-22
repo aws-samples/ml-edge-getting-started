@@ -230,16 +230,10 @@ class MainStack(Stack):
     
     new_deployment_package_notification = aws_s3_notifications.LambdaDestination(function_iot_deployment)
 
-    if use_greengrass is True:
-      deployment_bucket.add_event_notification(
-        s3.EventType.OBJECT_CREATED, 
-        new_deployment_package_notification,
-        s3.NotificationKeyFilter(suffix="zip"))
-    else:
-      deployment_bucket.add_event_notification(
-        s3.EventType.OBJECT_CREATED, 
-        new_deployment_package_notification,
-        s3.NotificationKeyFilter(suffix="json"))
+    deployment_bucket.add_event_notification(
+      s3.EventType.OBJECT_CREATED, 
+      new_deployment_package_notification,
+      s3.NotificationKeyFilter(suffix="json"))
   
     deployment_bucket.grant_read(function_iot_deployment)
     
@@ -278,15 +272,32 @@ class MainStack(Stack):
                 },
                 "build": { 
                     "commands": [
+                        "pip3 install git+https://github.com/aws-greengrass/aws-greengrass-gdk-cli.git@v1.2.1",
                         "pip3 install torch==1.13.1",
                         "pip3 install numpy==1.24.2",
-                        "echo $PWD",
-                        "ls",
                         "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/$S3_ARTIFACTS_OBJECT $S3_ARTIFACTS_OBJECT",
                         "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/components ./ --recursive", # we pull all the artifacts used to build our deployment package,
+                        "touch trigger.json", # empty file, will be used to trigger a deployment
+                        "cp trigger.json /tmp",
                         "python $S3_ARTIFACTS_OBJECT", # run the script to build the deployment package
+                        "cd ./aws.samples.windturbine.detector.venv",
+                        "gdk component build -d",
+                        "gdk component publish --debug --bucket $DEPLOYMENT_BUCKET_NAME",
+                        "cd ../aws.samples.windturbine.model",
+                        "gdk component build -d",
+                        "gdk component publish --debug --bucket $DEPLOYMENT_BUCKET_NAME",
+                        "cd ../aws.samples.windturbine.detector",
+                        "gdk component build",
+                        "gdk component publish --debug --bucket $DEPLOYMENT_BUCKET_NAME",
                     ]
                 }
+            },
+            "artifacts": {
+                "files": [
+                    "trigger.json"
+                ],
+                "base-directory": "/tmp",
+                "discard-paths": "yes",
             }
         }),
         artifacts=cbuild.Artifacts.s3(
@@ -300,10 +311,21 @@ class MainStack(Stack):
       build_project.add_to_role_policy(iam.PolicyStatement(
         effect=iam.Effect.ALLOW,
         actions=[
-          'greengrass:CreateComponentVersion'
+          'greengrass:CreateComponentVersion',
+          'greengrass:ListComponentVersions'
         ],
         resources=[
           'arn:aws:greengrass:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':components:*'
+        ]
+      ))
+
+      build_project.add_to_role_policy(iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=[
+          's3:CreateBucket'
+        ],
+        resources=[
+          deployment_bucket.bucket_arn # gdk needs to have the right to create a bucket even though the already exists, so we give right to create only the bucket we already created
         ]
       ))
 
@@ -332,7 +354,6 @@ class MainStack(Stack):
                       "commands": [
                           "pip3 install torch==1.13.1",
                           "pip3 install numpy==1.24.2",
-                          "echo $CODEBUILD_BUILD_ID",
                           "aws s3 cp s3://$S3_ARTIFACTS_BUCKET/$S3_ARTIFACTS_OBJECT $S3_ARTIFACTS_OBJECT", # we pull the script which will be used to build our deployment package,
                           "python $S3_ARTIFACTS_OBJECT", # run the script to build the deployment package
                           "cp *.onnx /tmp", # the generated onnx file is copied to the folder used to copy artifacts

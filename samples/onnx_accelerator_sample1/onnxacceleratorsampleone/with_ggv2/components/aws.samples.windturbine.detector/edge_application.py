@@ -16,13 +16,13 @@
 import argparse
 import logging
 import time
-import paho.mqtt.client as mqtt
 import json
 import numpy as np
 import turbine
 from queue import Queue
 import onnxruntime as ort
 from datetime import datetime
+import paho.mqtt.client as mqtt
 import sys
 import os
 
@@ -87,41 +87,47 @@ if __name__ == '__main__':
     # load the json configuration
     parser = argparse.ArgumentParser()    
     print("[Main] Arguments - ", sys.argv[1:])
-    parser.add_argument("--config", type=str,required = True)
+    parser.add_argument("--broker", type=str,required = True, help='local broker host')
+    parser.add_argument("--port", type=str,required = True, help='local broker port')
+    parser.add_argument("--model-name", type=str,required = True, help='ONNX Model name')
+    parser.add_argument("--model-version", type=str,required = True, help='ONNX Model version')
+    parser.add_argument('--model-path', type=str, required = True, default='models', help='Absolute path to the model dir')
     args = parser.parse_args()
-    print("[Main] ConfigRaw - ", args.config)        
-    config = json.loads(args.config)
-    print("[Main] ConfigJson - ", config) 
 
     # Connect to the broker to acquire simulated data
     logging.info("Connecting to MQTT broker...")
-    client = mqtt.Client('onnx_edge_app')
+    client = mqtt.Client('onnx_detector_app')
     client.connected_flag=False
     client.on_connect = on_connect
     client.on_message = on_message
     client.loop_start()
-    client.connect(config['broker'], config['port'])
+    client.connect(args.broker, int(args.port))
     while not client.connected_flag: #wait in loop
         print("Waiting to connect")
         time.sleep(1)
     logging.info("Connected")
 
     # Initialize the OTA Model Manager
-    model_name = config['model_name']
-    model_version = config['model_version']
+    model_name = args.model_name
+    model_version = args.model_version
 
     # load model -> since the artifact is an archive, we create in the recipe an env
     # variable containing the decompressed path to the model
-    sess = ort.InferenceSession(os.environ['ONNX_MODEL_PATH'])
+    sess = None
+    try:
+        sess = ort.InferenceSession(args.model_path)
+    except Exception as e:
+        logging.error(e)
+        exit()
 
     cloud_connector = turbine.CloudConnector()
     
     # Some constants used for data prep + compare the results
-    statistics_path = os.environ['STATISTICS_PATH']
-    thresholds = np.load(statistics_path+'thresholds.npy')
-    raw_std = np.load(statistics_path+'raw_std.npy')
-    mean = np.load(statistics_path+'mean.npy')
-    std = np.load(statistics_path+'std.npy')
+    file_path = os.path.dirname(__file__)
+    thresholds = np.load(os.path.join(file_path, 'statistics/thresholds.npy'))
+    raw_std = np.load(os.path.join(file_path, 'statistics/raw_std.npy'))
+    mean = np.load(os.path.join(file_path, 'statistics/mean.npy'))
+    std = np.load(os.path.join(file_path, 'statistics/std.npy'))
     
     try:
         while True:
@@ -181,12 +187,3 @@ if __name__ == '__main__':
     logging.info("Shutting down")
     client.loop_stop()
     client.disconnect()
-    cloud_connector.exit("Done")
-
-
-
-
-
-
-
-

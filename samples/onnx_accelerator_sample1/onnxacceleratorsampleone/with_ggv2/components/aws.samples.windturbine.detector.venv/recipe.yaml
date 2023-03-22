@@ -1,0 +1,24 @@
+RecipeFormatVersion: "2020-01-25"
+ComponentName: "{COMPONENT_NAME}"
+ComponentVersion: "{COMPONENT_VERSION}"
+ComponentDescription: "Virtual Environment for Turbine Detector component"
+ComponentPublisher: "{COMPONENT_AUTHOR}"
+Manifests:
+  - Platform:
+      os: linux
+      architecture: aarch64
+    Lifecycle:
+      Install: 
+        Script: |-
+          rm -rf venv
+          python3 -m venv venv
+          . venv/bin/activate
+          pip3 install --upgrade pip 
+          python3 -m pip install --upgrade setuptools
+          pip3 install numpy==1.24.2 
+          pip3 install pywt==1.0.6  
+          pip3 install awsiotsdk==1.12.5
+          pip3 install paho-mqtt==1.6.1
+          pip3 install onnxruntime===1.13.1 Pywavelets==1.4.1
+          pip3 install cmd-utils===1.0.0
+        Timeout: 600

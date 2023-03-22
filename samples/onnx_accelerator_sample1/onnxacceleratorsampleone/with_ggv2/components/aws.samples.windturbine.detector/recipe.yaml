@@ -1,0 +1,44 @@
+RecipeFormatVersion: "2020-01-25"
+ComponentName: "{COMPONENT_NAME}"
+ComponentVersion: "{COMPONENT_VERSION}"
+ComponentDescription: Detects anomalies for wind turbines
+ComponentPublisher: "{COMPONENT_AUTHOR}"
+ComponentConfiguration:
+  DefaultConfiguration:
+    model_name: "__MODEL_NAME__"
+    model_version: "__MODEL_VERSION__"
+    broker: "localhost"
+    port: 1883
+    accessControl:
+      aws.greengrass.ipc.mqttproxy: 
+        policy_1:
+          policyDescription: My policy
+          operations:
+            - aws.greengrass#PublishToIoTCore
+          resources:
+            - "*"
+      
+ComponentDependencies: 
+  aws.samples.windturbine.model:
+    VersionRequirement: ">=1.0.0 <1.1.0"
+    DependencyType: HARD
+  aws.samples.windturbine.detector.venv:
+    VersionRequirement: ">=1.0.0 <1.1.0"
+    DependencyType: HARD
+Manifests:
+  - Platform:
+      os: linux
+      architecture: aarch64
+    Lifecycle:
+      Run:
+        Script: |-
+          . {aws.samples.windturbine.detector.venv:work:path}/venv/bin/activate
+          python3 -u {artifacts:decompressedPath}/aws.samples.windturbine.detector/edge_application.py  \
+            --broker {configuration:/broker} --port {configuration:/port} --model-name {configuration:/model_name} --model-version {configuration:/model_version} --model-path {aws.samples.windturbine.model:artifacts:decompressedPath}/aws.samples.windturbine.model/windturbine.onnx
+      Shutdown: rm -rf *
+    Artifacts:
+      - URI: "s3://{BUCKET_NAME}/{COMPONENT_NAME}/{COMPONENT_VERSION}/{COMPONENT_NAME}.zip"
+        Unarchive: ZIP
+        Permission:
+          Read: "OWNER"
+          Execute: "OWNER"
