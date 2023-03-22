@@ -110,46 +110,47 @@ In [this directory](./simulated_device/) you'll find the Python application that
 
 The steps of this section are also described in the dedicated AWS IoT Immersion Day Workshop: https://catalog.workshops.aws/aws-iot-immersionday-workshop/en-US/aws-greengrassv2/greengrass-physicaldevice/lab37-rpi-greengrass-basics
 
-- Follow the steps described in the following link to create a user and get credentials: https://catalog.workshops.aws/aws-iot-immersionday-workshop/en-US/aws-greengrassv2/greengrass-physicaldevice/lab37-rpi-greengrass-basics#create-an-aws-user-for-device-provisioning under Step 2 -> Create an AWS user for device provisioning
+- Follow the steps described in the following link to create a user and get credentials: https://catalog.workshops.aws/aws-iot-immersionday-workshop/en-US/aws-greengrassv2/greengrass-physicaldevice/lab37-rpi-greengrass-basics#create-an-aws-user-for-device-provisioning under Step 2
+
+    When prompted to enter the core device name and thing group name, use the following values:
+    - Core device name: WindTurbine
+    - thing group name: WindTurbines
+  
+    Follow the remaining instructions in step 2 to install the Greengrass Core software on your Raspberry pi using the credentials you created previously
+    ```
+    curl -s https://d2s8p88vqu9w66.cloudfront.net/releases/greengrass-nucleus-latest.zip > greengrass-nucleus-latest.zip && unzip greengrass-nucleus-latest.zip -d GreengrassInstaller
+    ```
+    Replace the region in the next command if different from ```us-east-1```
+    ```
+    sudo -E java -Droot="/greengrass/v2" -Dlog.store=FILE -jar ./GreengrassInstaller/lib/Greengrass.jar --aws-region us-east-1 --thing-name WindTurbine --thing-group-name WindTurbines --component-default-user ggc_user:ggc_group --provision true --setup-system-service true --deploy-dev-tools true
+    ```
+    Verify that greengrass is correctly running on the Raspberry pi : 
+    ```
+    sudo systemctl status greengrass.service
+    ```
 
 - Each core device has a core device IAM role that allows it to interact with AWS IoT and send logs to the AWS Cloud. This device role doesn't allow access to S3 buckets by default, so you must create and attach a policy that allows the core device to retrieve component artifacts from the S3 bucket.
 In the IAM console navigation menu, choose Policies, and then choose Create policy. On the JSON tab, replace the placeholder content with the following policy (replace DEPLOYMENT_BUCKET_NAME with the value of the following Clouformation output: ```onnxacceleratorsampleone-dev.DeploymentPackageS3BucketName```)
 
-```
-{
-  "Sid": "DownloadArtifacts",
-  "Effect": "Allow",
-  "Action": [
-      "s3:GetObject"
-  ],
-  "Resource": "arn:aws:s3:::<DEPLOYMENT_BUCKET_NAME>/*"
-}
-```
-Choose Next: Tags, and then choose Next: Review.
-For Name, enter ```GreengrassV2ComponentArtifactPolicy``` and click Create policy.
+    ```
+    {
+    "Sid": "DownloadArtifacts",
+    "Effect": "Allow",
+    "Action": [
+        "s3:GetObject"
+    ],
+    "Resource": "arn:aws:s3:::<DEPLOYMENT_BUCKET_NAME>/*"
+    }
+    ```
+    Choose Next: Tags, and then choose Next: Review.
+    For Name, enter ```GreengrassV2ComponentArtifactPolicy``` and click Create policy.
 
-In the IAM console navigation menu, choose Role, and then choose the name of the role for the core device. You specified this role name when you installed the AWS IoT Greengrass Core software. If you did not specify a name, the default is GreengrassV2TokenExchangeRole.
+    In the IAM console navigation menu, choose Role, and then choose the name of the role for the core device. You specified this role name when you installed the AWS IoT Greengrass Core software. If you did not specify a name, the default is GreengrassV2TokenExchangeRole.
 
-Under Permissions, choose Add permissions, then choose Attach policies.
+    Under Permissions, choose Add permissions, then choose Attach policies.
 
-On the Add permissions page, select the check box next to the ```GreengrassV2ComponentArtifactPolicy``` policy that you created, and then choose Attach policies.
+    On the Add permissions page, select the check box next to the ```GreengrassV2ComponentArtifactPolicy``` policy that you created, and then choose Attach policies.
 
-- Navigate to the AWS IoT  console -> Greengrass devices -> Core devices and then click Set up one core device
-- Enter the core device name and thing group name:
-  - Core device name: WindTurbine
-  - thing group name: WindTurbines
-- Follow the remaining instructions in step 2 to install the Greengrass Core software on your Raspberry pi using the credentials you created previously
-```
-curl -s https://d2s8p88vqu9w66.cloudfront.net/releases/greengrass-nucleus-latest.zip > greengrass-nucleus-latest.zip && unzip greengrass-nucleus-latest.zip -d GreengrassInstaller
-```
-Replace the region in the next command if different from ```us-east-1```
-```
-sudo -E java -Droot="/greengrass/v2" -Dlog.store=FILE -jar ./GreengrassInstaller/lib/Greengrass.jar --aws-region us-east-1 --thing-name WindTurbine --thing-group-name WindTurbines --component-default-user ggc_user:ggc_group --provision true --setup-system-service true --deploy-dev-tools true
-```
-- Verify that greengrass is correctly running on the Raspberry pi : 
-  ```
-  sudo systemctl status greengrass.service
-  ```
 - Click ```IoT Core``` -> ```Greengrass devices``` -> ```Core devices``` from the AWS console to view the created device 
 - Click ```IoT Core``` -> ```Greengrass devices``` -> ```Deployments``` from the AWS console to view the created deployment, named ```Deployment for Windturbines``` 
 

@@ -102,7 +102,7 @@ After successfully deploying the project, you need to configure your edge device
 In [this directory](./simulated_device/) you'll find the Python application that runs on each edge device and streams synthetic raw turbine data, which has been collected from real sensors installed in a 3D printed mini wind turbine. The README in that folder provides instructions on how to configure and run that application.
 
 > **Warning**
-> To keep things simple for this code sample, the simulated device and the windturbine detector component are communicating through a local MQTT broker, unauthenticated. To secure your connection, you can follow the steps described in the [AWS IoT Greengrass V2 workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/5ecc2416-f956-4273-b729-d0d30556013f/en-US/chapter6-mqtt-broker)
+> To keep things simple for this code sample, the simulated device and the detector application are communicating through a local MQTT broker, unauthenticated. Do not use this in production. It is a security best practice to always use an encrypted, secured connection.
 
 ### Edge Application
 
