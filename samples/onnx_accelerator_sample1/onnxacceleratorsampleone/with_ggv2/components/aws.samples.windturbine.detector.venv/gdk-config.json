@@ -1,0 +1,16 @@
+{
+    "component": {
+      "aws.samples.windturbine.detector.venv": {
+        "author": "Amazon.com",
+        "version": "_COMPONENT_VERSION_",
+        "build": {
+          "build_system": "zip"
+        },
+        "publish": {
+          "bucket": "_BUCKET_NAME_",
+          "region": "_REGION_"
+        }
+      }
+    },
+    "gdk_version": "1.1.0"
+  }

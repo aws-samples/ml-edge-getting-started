@@ -3,7 +3,8 @@
   "context": {
     "thing_name": "WindTurbine",
     "thing_group_name": "WindTurbines",
-    "devices_logs_topic": "device/+/logs"
+    "devices_logs_topic": "device/+/logs",
+    "use_greengrass": false
   },
   "output": "cdk.out",
   "watch": {

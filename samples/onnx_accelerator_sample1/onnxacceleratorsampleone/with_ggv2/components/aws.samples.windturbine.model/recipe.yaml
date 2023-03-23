@@ -1,0 +1,18 @@
+RecipeFormatVersion: "2020-01-25"
+ComponentName: "{COMPONENT_NAME}"
+ComponentVersion: "{COMPONENT_VERSION}"
+ComponentDescription: "Model to detect anomalies for wind turbines"
+ComponentPublisher: "{COMPONENT_AUTHOR}"
+Manifests:
+- Platform:
+      os: linux
+      architecture: aarch64
+  Lifecycle:
+    Run: 
+      Script: |-
+          echo Model ready
+  Artifacts:
+  - URI: "s3://{BUCKET_NAME}/{COMPONENT_NAME}/{COMPONENT_VERSION}/{COMPONENT_NAME}.zip"
+    Unarchive: "ZIP"
+    Permission:
+      Read: "ALL"
