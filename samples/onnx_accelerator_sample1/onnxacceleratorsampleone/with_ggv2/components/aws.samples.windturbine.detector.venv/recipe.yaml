@@ -20,5 +20,5 @@ Manifests:
           pip3 install awsiotsdk==1.12.5
           pip3 install paho-mqtt==1.6.1
           pip3 install onnxruntime===1.13.1 Pywavelets==1.4.1
-          pip3 install cmd-utils===1.0.0
+          pip3 install cmd-utils===1.0.0 requests===2.27.1
         Timeout: 600
