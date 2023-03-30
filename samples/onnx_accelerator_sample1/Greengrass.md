@@ -50,7 +50,7 @@ Default output format [None]: json
 
 ## Deploy the solution
 
-This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) and [projen](https://github.com/projen/projen). See [Getting Started With the AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html) for additional details and prerequisites
+This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) and [projen](https://github.com/projen/projen). See [Getting Started With the AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html) for additional details and prerequisites. When running the commands below, projen will run ```python``` and not ```python3```, so make sure your ```python``` command runs the correct Python version. 
 
 1. Clone this repository.
     ```shell
@@ -98,6 +98,13 @@ The following outputs are generated:
 ## Edge device
 
 After successfully deploying the project, you need to configure your edge device (Raspberry Pi).
+
+> **Note**
+> If you don't have a Raspberry Pi, you can use a target with an operating system as an edge device, like an [EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Instances.html). In that case, you will need to udpate the recipes for the [components](./onnxacceleratorsampleone/with_ggv2/components/). For each component, open the yaml recipe file and replace the os/architecture with the values corresponding to your target. Once done, repeat the previous step to synthesize (```cdk synth```) and redeploy the project (```cdk deploy```).
+
+### Dependencies
+
+On your edge device, make sure you have [installed Python 3, pip3 and virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
 
 ### Simulated device
 
