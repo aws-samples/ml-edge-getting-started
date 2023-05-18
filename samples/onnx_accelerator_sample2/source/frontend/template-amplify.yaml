@@ -1,0 +1,119 @@
+# Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: LicenseRef-.amazon.com.-AmznSL-1.0
+# Licensed under the Amazon Software License  http://aws.amazon.com/asl/
+
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  MainBackendStackName:
+    Type: String
+    Default: onnxacceleratormobilebackend-dev
+
+Resources:
+  Repository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: "frontend"
+
+  AmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: frontend
+      Repository: !GetAtt Repository.CloneUrlHttp
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm ci
+            build:
+              commands:
+                - npm run build
+          artifacts:
+            baseDirectory: out
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+      CustomRules:
+        - Source: /<*>
+          Target: /index.html
+          Status: '404'
+      IAMServiceRole: !GetAtt AmplifyRole.Arn
+
+  AmplifyMainBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      BranchName: main
+      AppId: !GetAtt AmplifyApp.AppId
+      EnableAutoBuild: true
+      EnvironmentVariables:
+        - Name: NEXT_PUBLIC_REGION_NAME
+          Value: !Ref AWS::Region
+        - Name: NEXT_PUBLIC_COGNITO_USER_POOL_ID
+          Value: !ImportValue
+            Fn::Sub: '${MainBackendStackName}CognitoUserPoolId'
+        - Name: NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID
+          Value: !ImportValue
+            Fn::Sub: '${MainBackendStackName}CognitoUserPoolClientId'
+        - Name: NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID
+          Value: !ImportValue
+            Fn::Sub: '${MainBackendStackName}CognitoIdentityPoolId'
+        - Name: NEXT_PUBLIC_API_GATEWAY_ENDPOINT
+          Value: !ImportValue
+            Fn::Sub: '${MainBackendStackName}ApiGwConstructEndpoint'
+
+  AmplifyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: LogsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:${AWS::Partition}:logs::${AWS::AccountId}:*'
+        - PolicyName: GitPullPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codecommit:GitPull
+                Resource: !GetAtt Repository.Arn
+        - PolicyName: AmplifyPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - amplify:GetApp
+                  - amplify:GetBranch
+                  - amplify:UpdateApp
+                  - amplify:UpdateBranch
+                  - amplify:CreateDeployment
+                  - amplify:StartDeployment
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:amplify::${AWS::AccountId}:*'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - amplify.amazonaws.com
+            Action:
+              - sts:AssumeRole
+Outputs:
+  RepositoryCloneUrlHttp:
+    Value: !GetAtt Repository.CloneUrlHttp
+  RepositoryCloneUrlSsh:
+    Value: !GetAtt Repository.CloneUrlSsh
+  RepositoryCloneUrlGrc:
+    Value: !Sub "codecommit::${AWS::Region}://${Repository.Name}"
