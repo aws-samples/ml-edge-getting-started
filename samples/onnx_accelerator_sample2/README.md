@@ -2,7 +2,7 @@
 
 This code sample provides an end-to-end solution that manages the lifecycle of ML models deployed on a PC/mobile device. 
 
-A web application built and deployed with [AWS Amplify](https://aws.amazon.com/amplify/?trk=66d9071f-eec2-471d-9fc0-c374dbda114d&sc_channel=ps&ef_id=EAIaIQobChMI4KyigqSx_gIVzhXUAR3ZDgweEAAYASAAEgIjGPD_BwE:G:s&s_kwcid=AL!4422!3!646025317188!e!!g!!amplify%20aws!19610918335!148058249160) provides user with a UI to analyze a picture using a ML model. Once the prediction is done, inference metrics along with the image used are pushed to the cloud.
+A web application built and deployed with [AWS Amplify](https://aws.amazon.com/amplify/?trk=66d9071f-eec2-471d-9fc0-c374dbda114d&sc_channel=ps&ef_id=EAIaIQobChMI4KyigqSx_gIVzhXUAR3ZDgweEAAYASAAEgIjGPD_BwE:G:s&s_kwcid=AL!4422!3!646025317188!e!!g!!amplify%20aws!19610918335!148058249160) provides user with a UI to analyze a picture using a ML model ([Pytorch Vision MobileNet V2](https://pytorch.org/hub/pytorch_vision_mobilenet_v2/)). This pre-trained model, available on [SageMaker Jumpstart](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-jumpstart.html), is fine-tuned on a custom dataset. Once the prediction is done, inference metrics along with the image used are pushed to the cloud.
 
 The inference is performed in JavaScript on device, in the browser using [ONNX Runtime web](https://www.npmjs.com/package/onnxruntime-web). ONNX Runtime Web can run on both CPU and GPU. On CPU side, WebAssembly is adopted to execute the model at near-native speed. For performance acceleration with GPUs, ONNX Runtime Web leverages WebGL, a popular standard for accessing GPU capabilities.
 
@@ -26,10 +26,10 @@ The idea is to use [Amazon SageMaker](https://aws.amazon.com/sagemaker/) to fine
 1. A developer pushes some changes to the code repository containing the application code
 2. Through Amplify, a build is triggered and once successfull, the application is deployed
 4. User can access the application from his device using a web browser
-5. A data scientist uses [Sagemaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html) to fine tune a pre-trained ML model from [Amazon Sagemaker Jumpstart](https://aws.amazon.com/sagemaker/jumpstart/?sagemaker-data-wrangler-whats-new.sort-by=item.additionalFields.postDateTime&sagemaker-data-wrangler-whats-new.sort-order=desc)
-7. The model is registered in the [Sagemaker Model Registry](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html) with a new version, awaiting approval
+5. A data scientist uses [SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html) to fine tune a pre-trained ML model from [Amazon SageMaker Jumpstart](https://aws.amazon.com/sagemaker/jumpstart/?sagemaker-data-wrangler-whats-new.sort-by=item.additionalFields.postDateTime&sagemaker-data-wrangler-whats-new.sort-order=desc)
+7. The model is registered in the [SageMaker Model Registry](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html) with a new version, awaiting approval
 8. A QA engineer validates manually the model version 
-9. When a model is approved, an [Amazon Eventbridge rule](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html) triggers a new deployment
+9. When a model is approved, an [Amazon EventBridge rule](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html) triggers a new deployment
 10. Model is exported to the ONNX format and/or optimized for the target
 11. Model is stored in an [Amazon Simple Storage Service](https://aws.amazon.com/s3/) (S3) bucket
 12. The user on his mobile device uses the application to authenticate to the cloud through [Amazon Cognito](https://aws.amazon.com/cognito/)

@@ -28,9 +28,9 @@ This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com
     $ git clone https://github.com/aws-samples/ml-edge-getting-started/
     ```
 
-2. Enter the code sample directory.
+2. Enter the code sample backend directory.
     ```shell
-    $ cd samples/onnx_accelerator_sample1
+    $ cd samples/onnx_accelerator_sample2/source/backend
     ```
  
 3. Activate virtualenv, install dependencies and synthesize.
@@ -51,7 +51,7 @@ This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com
 Once the stack is deployed, in the AWS console go to Cloudformation -> Stacks -> onnxacceleratormobilebackend-dev -> Outputs
 
 The following outputs are generated:
-- ```cfnoutputdatascientistteamA```	: The User Arn user for the sagemaker user representing the Data science team
+- ```cfnoutputdatascientistteamA```	: The User Arn user for the SageMaker user representing the Data science team
 - ```ApiGwConstructApiGatewayEndpoint*``` : The API Gateway endpoint
 - ```CognitoIdentityPoolId``` : The id of the identity pool, used for authorization (access control). Users can obtain temporary AWS credentials to access AWS services, such as Amazon S3
 - ```CognitoUserPoolClientId``` : Id of the user pool client, connected to the user pool. This id is used by applications to access the user pool
@@ -60,28 +60,28 @@ The following outputs are generated:
 - ```DashboardOutput```	: URL of the Cloudwatch dashboard providing visualization of anomalies and raw data
 - ```InputImagesS3BucketName``` : The S3 bucket containing the input images from devices, used for inference
 - ```DeploymentPackageS3BucketName``` : The S3 bucket containing the deployment artifacts for edge devices (onnx exported model + job json file)
-- ```DomainIdSagemaker``` : The sagemaker domain ID
+- ```DomainIdSagemaker``` : The SageMaker domain ID
 
 > **Note**
-> Sagemaker Studio will be provisioned using the default VPC, thus it needs to exist. If you want to use a different VPC, udpate ```default_vpc_id = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)``` in [main_stack.py](./onnxacceleratorsampleone/main_stack.py)
+> SageMaker Studio will be provisioned using the default VPC, thus it needs to exist. If you want to use a different VPC, udpate ```default_vpc_id = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)``` in [main_stack.py](./onnxacceleratorsampleone/main_stack.py)
 
 ## Notebook
 
 Once your application is correctly deployed, you can deploy the ML model.
 
-1. In the AWS console, go to Amazon Sagemaker and select Studio. 
+1. In the AWS console, go to Amazon SageMaker and select Studio. 
 2. In the Get Started right panel, select the ```datascientist-team-a``` and click Open Studio.
 3. On the left menu bar, select Git and Clone a Repository
 4. In the drop-down enter https://github.com/aws-samples/ml-edge-getting-started.git
 5. Select the explorer view, select ```ml-edge-getting-started/samples/onnx_accelerator_mobile/notebooks``` and open the notebook ```image_classification.ipynb```
-8. Execute the cells in the notebook to train the model, and register it in the Amazon Sagemaker Model registry. The model artifacts will also be stored in the sagemaker default Amazon Simple Storage Service (S3) bucket.
+8. Execute the cells in the notebook to train the model, and register it in the Amazon SageMaker Model registry. The model artifacts will also be stored in the SageMaker default Amazon Simple Storage Service (S3) bucket.
 9. On the left menu bar, select ```Home``` -> ```Models``` -> ```Model registry```
 10. Double click the ```modelPackageImageClassification``` model group name
 11. Select the model version you just created, double click on it and update its status in the top right corner from ```PendingManualApproval``` to ```Approved```
 
 ## Model export and deployment
 
-Approving the model version in the Amazon Sagemaker Model registry triggers a codebuild step. The Eventbridge rule sends an event to Codebuild with information about the model you just approved. A new build step is then triggered, pulling the model artifact and exporting it to the ONNX format. This step is performed in [build_deployment_package.py](./onnxacceleratormobilebackend/codebuild/build_deployment_package.py). The script then runs an inference session using the ONNX Runtime to compare results of the onnx model with the PyTorch one. The exported model is saved in the deployment package S3 bucket.
+Approving the model version in the Amazon SageMaker Model registry triggers a codebuild step. The Eventbridge rule sends an event to Codebuild with information about the model you just approved. A new build step is then triggered, pulling the model artifact and exporting it to the ONNX format. This step is performed in [build_deployment_package.py](./onnxacceleratormobilebackend/codebuild/build_deployment_package.py). The script then runs an inference session using the ONNX Runtime to compare results of the onnx model with the PyTorch one. The exported model is saved in the deployment package S3 bucket.
 
 Because the model is loaded and run on device, the model must fit on the device disk and be able to be loaded into the device’s memory.
 

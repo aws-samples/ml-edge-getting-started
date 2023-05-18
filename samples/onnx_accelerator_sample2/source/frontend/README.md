@@ -31,12 +31,16 @@ Default output format [None]: json
 Deploy a pipeline stack to create a code repository with a single branch and a CI/CD pipeline.
 Then, push the code to the repository for the pipeline to build and deploy the web application.
 
-1. Run AWS CLI command line tool to deploy the `onnxacceleratormobilefrontend-dev`.
+1. Enter the code sample frontend directory.
+    ```shell
+    $ cd samples/onnx_accelerator_sample2/source/frontend
+    ```
+2. Run AWS CLI command line tool to deploy the `onnxacceleratormobilefrontend-dev`.
    It contains an AWS CodeCommit repository and an application definition on AWS Amplify console.
     ```shell
     $ aws cloudformation deploy --template-file template-amplify.yaml --stack-name onnxacceleratormobilefrontend-dev --capabilities CAPABILITY_IAM
     ```
-2. Run AWS CLI to retrieve the web application stack outputs and to get the clone URL for the new AWS CodeCommit repository.
+3. Run AWS CLI to retrieve the web application stack outputs and to get the clone URL for the new AWS CodeCommit repository.
     ```shell
     $ aws cloudformation describe-stacks --stack-name onnxacceleratormobilefrontend-dev --query "Stacks[0].Outputs"
     [
@@ -54,7 +58,7 @@ Then, push the code to the repository for the pipeline to build and deploy the w
         }
     ]
     ```
-3. Create the initial commit and push it to the AWS CodeCommit repository's `main` branch.
+4. Create the initial commit and push it to the AWS CodeCommit repository's `main` branch.
    Replace `<REPOSITORY_CLONE_URL>` with your repository clone URL.
     ```shell
     $ git remote remove origin
@@ -67,7 +71,7 @@ Then, push the code to the repository for the pipeline to build and deploy the w
     
     $ git push -u origin main
     ```
-4. AWS Amplify console should run automatically to create the `main` environment. The web application will get built and deployed.
+5. AWS Amplify console should run automatically to create the `main` environment. The web application will get built and deployed.
 
 ![amplify.png](../../doc/images/amplify_hosting.png)
 
