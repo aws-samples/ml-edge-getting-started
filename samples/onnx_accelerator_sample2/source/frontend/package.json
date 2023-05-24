@@ -15,7 +15,7 @@
     "bootstrap": "^5.1.0",
     "bootstrap-icons": "^1.7.2",
     "fs": "^0.0.1-security",
-    "jimp": "^0.3.5",
+    "jimp": "^0.15.0",
     "lodash": "^4.17.21",
     "ndarray": "^1.0.19",
     "ndarray-ops": "^1.2.2",
