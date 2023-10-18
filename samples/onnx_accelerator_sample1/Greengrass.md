@@ -46,7 +46,11 @@ Default output format [None]: json
 ```
 
 - Node.js: v18.12.1
-- [AWS CDK](https://github.com/aws/aws-cdk/releases/tag/v2.68.0): 2.68.0
+- [AWS CDK](https://github.com/aws/aws-cdk/releases/tag/v2.94.0): 2.94.0
+- [Projen](https://projen.io/): 0.65.14
+```
+npm install -g npm aws-cdk projen
+```
 - jq: jq-1.6
 - Raspberry Pi (tested with a Raspberry Pi 4)
 
@@ -64,12 +68,12 @@ This project is built using [Cloud Development Kit (CDK)](https://aws.amazon.com
     $ cd samples/onnx_accelerator_sample1
     ```
 
-3. Verify that the project is configured to deploy the AWS IoT Greengrass version. Open the file ```.projenrc.py``` and verify that the value for ```use_greengrass``` on line 27 is set to ```True```. If not, update the value and then run the follwing command to synthesize the project:
+3. Verify that the project is configured to deploy the AWS IoT Greengrass version. Open the file ```.projenrc.py``` and verify that the value for ```use_greengrass``` on line 27 is set to ```True```. If not, update the value and then run the follwing command to install the project:
     ```shell
-    $ npx projen
+    $ npx projen install
     ```
  
-3. Activate virtualenv, install dependencies and synthesize.
+3. Run a full build.
     ```shell
     $ npx projen build
     ```
@@ -174,6 +178,11 @@ Once your edge device is configured correctly, you can build and deploy the ML m
 3. On the left menu bar, select Git and Clone a Repository
 4. In the drop-down enter https://github.com/aws-samples/ml-edge-getting-started.git
 5. Select the explorer view, select ```ml-edge-getting-started/samples/onnx_accelerator_sample1/notebooks``` and open the notebook ```01 - Data Preparation.ipynb```
+
+If prompted to setup a notebook environment, select the image ```Data Science 3.0```
+
+![notebook_environment.png](./doc/images/notebook_environment.png)
+
 6. Execute the cells in the notebook to transform (feature selection, cleaning, denoising, normalizing, etc) the sensors data (raw) into a dataset used to train the model
 7. In the explorer view, select ```ml-edge-getting-started/samples/onnx_accelerator_sample1/notebooks``` and open the notebook ```02 - Training with Pytorch.ipynb```
 8. Execute the cells in the notebook to train the model (Pytorch Autoencoder), and register it in the Amazon Sagemaker Model registry. The model artifacts will also be stored in the sagemaker default Amazon Simple Storage Service (S3) bucket.

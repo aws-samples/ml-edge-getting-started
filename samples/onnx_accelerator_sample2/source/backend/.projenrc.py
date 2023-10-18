@@ -20,7 +20,7 @@ from projen.awscdk import AwsCdkPythonApp
 project = AwsCdkPythonApp(
     author_email="Amazon Web Services",
     author_name="Amazon Web Services",
-    cdk_version="2.70.0",
+    cdk_version="2.94.0",
     module_name="onnxacceleratormobilebackend",
     name="onnxacceleratorsamplemobile",
     version="0.1.0",

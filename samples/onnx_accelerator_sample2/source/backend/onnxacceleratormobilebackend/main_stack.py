@@ -174,7 +174,7 @@ class MainStack(Stack):
         'sagemaker:DescribeModelPackage'
       ],
       resources=[
-        'arn:aws:sagemaker:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':model-package/'+cfn_model_package_group.model_package_group_name.lower()+'/*' #the model group name needs to be lowercase
+        'arn:aws:sagemaker:'+ Aws.REGION+':'+ Aws.ACCOUNT_ID+':model-package/'+cfn_model_package_group.model_package_group_name+'/*'
       ]
     ))
 
