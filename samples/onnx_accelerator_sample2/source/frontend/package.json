@@ -19,7 +19,7 @@
     "lodash": "^4.17.21",
     "ndarray": "^1.0.19",
     "ndarray-ops": "^1.2.2",
-    "next": "^12.2.4",
+    "next": "^13.5.0",
     "onnxruntime-web": "^1.14.0",
     "react": "17.0.2",
     "react-bootstrap": "^2.4.0",
