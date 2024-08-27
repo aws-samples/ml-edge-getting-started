@@ -71,10 +71,20 @@ Once your application is correctly deployed, you can deploy the ML model.
 
 1. In the AWS console, go to Amazon SageMaker and select Studio. 
 2. In the Get Started right panel, select the ```datascientist-team-a``` and click Open Studio.
-3. On the left menu bar, select Git and Clone a Repository
+3. Under ```Applications```, select ```Studio Classic```. In the new window, select ```datascientist-team-A``` and on the right part of the table, click on ```Open```.
+
+![sg_studio_classic.png](../../doc/images/sg_studio_classic.png)
+
+3. On the left menu bar, select Git and Clone a Repository.
 4. In the drop-down enter https://github.com/aws-samples/ml-edge-getting-started.git
-5. Select the explorer view, select ```ml-edge-getting-started/samples/onnx_accelerator_mobile/notebooks``` and open the notebook ```image_classification.ipynb```
+5. Select the explorer view, select ```ml-edge-getting-started/samples/onnx_accelerator_mobile/notebooks``` and open the notebook ```image_classification.ipynb```. If prompted to setup a notebook environment, select the image ```Data Science 3.0```
+
+![notebook_environment.png](../../doc/images/notebook_environment.png)
+
 8. Execute the cells in the notebook to train the model, and register it in the Amazon SageMaker Model registry. The model artifacts will also be stored in the SageMaker default Amazon Simple Storage Service (S3) bucket.
+
+> Note: Make sure you have sufficient quota for each of the compute instance used in this solution. For more information, refer to [AWS service quotas](https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html). You can find the instances used in the notebook mentioned above.
+
 9. On the left menu bar, select ```Home``` -> ```Models``` -> ```Model registry```
 10. Double click the ```modelPackageImageClassification``` model group name
 11. Select the model version you just created, double click on it and update its status in the top right corner from ```PendingManualApproval``` to ```Approved```
