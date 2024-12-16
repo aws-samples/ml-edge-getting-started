@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-amplify/ui-react": "^3.2.1",
+    "@aws-amplify/ui-react": "^5.0.4",
     "@types/bootstrap": "^5.2.1",
-    "aws-amplify": "4.3.30",
+    "aws-amplify": "5.3.4",
     "bootstrap": "^5.1.0",
     "bootstrap-icons": "^1.7.2",
     "fs": "^0.0.1-security",
